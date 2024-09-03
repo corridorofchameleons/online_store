@@ -13,7 +13,7 @@ users = Table(
     Column('email', String, nullable=False),
     Column('phone', String, nullable=False),
     Column('password', String, nullable=False),
-    Column('registered_at', TIMESTAMP, default=datetime.now(UTC))
+    Column('registered_at', TIMESTAMP, default=datetime.utcnow)
 )
 
 
