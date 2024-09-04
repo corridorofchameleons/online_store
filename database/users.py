@@ -1,7 +1,7 @@
 import asyncpg
 import sqlalchemy
 from fastapi import HTTPException
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, delete
 
 from database.db_config import engine
 from models.users import users
@@ -40,3 +40,13 @@ async def get_user_by_email(email: str):
         user = await conn.execute(stmt)
 
     return user.first()
+
+
+async def delete_user(user):
+    '''
+    Удаляет пользователя
+    '''
+    async with engine.connect() as conn:
+        stmt = delete(users).where(users.c.id == user.id)
+        await conn.execute(stmt)
+        await conn.commit()
