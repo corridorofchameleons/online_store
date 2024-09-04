@@ -24,11 +24,14 @@ async def login(user: UserAuth):
     """
     Generates token
     """
+    print(user)
     found_user = await get_user_by_email(user.email)
     if not found_user:
         raise HTTPException(status_code=404, detail='No user was found')
 
     hashed_password = hash_password(user.password)
+    print(hashed_password)
+    print(found_user.password)
     if found_user.password != hashed_password:
         raise HTTPException(status_code=401, detail='Incorrect email or password')
 

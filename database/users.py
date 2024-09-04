@@ -1,7 +1,9 @@
+import asyncpg
+import sqlalchemy
 from fastapi import HTTPException
 from sqlalchemy import select, insert
 
-from database.db_config import engine, get_async_session
+from database.db_config import engine
 from models.users import users
 from services.utils import hash_password
 
@@ -23,6 +25,8 @@ async def create_user(name, email, phone, password):
             await conn.execute(stmt)
             await conn.commit()
 
+    except sqlalchemy.exc.IntegrityError:
+        raise HTTPException(status_code=422, detail=f'User already exists')
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Internal server error: {e}')
 
