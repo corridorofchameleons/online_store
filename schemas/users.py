@@ -30,3 +30,11 @@ class UserOutModel(BaseModel):
     name: str
     email: str
     phone: str
+
+
+class UserAuth(BaseModel):
+    """
+    Сериализатор аутентификации
+    """
+    email: str
+    password: str

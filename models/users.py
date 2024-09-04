@@ -17,3 +17,10 @@ users = Table(
 )
 
 
+tokens = Table(
+    'tokens',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('token', String, nullable=False),
+    Column('user', Integer, ForeignKey('users.id'))
+)
