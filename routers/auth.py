@@ -3,7 +3,7 @@ from fastapi import HTTPException, APIRouter, status, Request
 
 from config.settings import SECRET_KEY, ALGORITHM
 from database.users import get_user_by_email
-from schemas.users import UserAuth
+from schemas.auth import AuthModel
 from services.utils import hash_password
 
 router = APIRouter()
@@ -15,8 +15,12 @@ def create_jwt_token(data: dict):
     return encoded_jwt
 
 
+def decode_jwt_token(token):
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+
 @router.post("/token")
-async def login(user: UserAuth):
+async def login(user: AuthModel):
     """
     Generates token
     """
@@ -30,10 +34,6 @@ async def login(user: UserAuth):
 
     access_token = create_jwt_token(data={"email": found_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-def decode_jwt_token(token):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
 async def get_current_user(request: Request):

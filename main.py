@@ -4,7 +4,6 @@ from models.users import users
 
 from routers.users import router as users_router
 from routers.auth import router as auth_router, get_current_user
-from schemas.users import UserBaseModel
 
 app = FastAPI()
 

@@ -1,17 +1,17 @@
 from fastapi import Depends
 from fastapi.routing import APIRouter
 
-from database.users import create_user, delete_user
+from database.users import create_user, delete_user, get_user_by_email, update_user
 from models.users import users
 from routers.auth import get_current_user
-from schemas.users import UserCreateModel, UserOutModel
+from schemas.users import UserCreateModel, UserOutModel, UserUpdateModel
 
 router = APIRouter()
 
 
 @router.post('/create', response_model=UserOutModel)
 async def create(user: UserCreateModel):
-    await create_user(user.name, user.email, user.phone, user.password)
+    await create_user(user)
     return user
 
 
@@ -19,3 +19,15 @@ async def create(user: UserCreateModel):
 async def delete(user: users = Depends(get_current_user)):
     await delete_user(user)
     return user
+
+
+@router.get('/me', response_model=UserOutModel)
+async def get(user: users = Depends(get_current_user)):
+    await get_user_by_email(user.email)
+    return user
+
+
+@router.put('/update', response_model=UserOutModel)
+async def put(new_data: UserUpdateModel, user: users = Depends(get_current_user)):
+    upd_user = await update_user(user, new_data)
+    return upd_user
