@@ -5,14 +5,16 @@ from database.users import create_user, delete_user, get_user_by_email, update_u
 from models.users import users
 from routers.auth import get_current_user
 from schemas.users import UserCreateModel, UserOutModel, UserUpdateModel
+from services.validators import user_data_is_valid, phone_is_valid
 
 router = APIRouter()
 
 
 @router.post('/create', response_model=UserOutModel)
 async def create(user: UserCreateModel):
-    await create_user(user)
-    return user
+    if user_data_is_valid(user):
+        await create_user(user)
+        return user
 
 
 @router.delete('/delete', response_model=UserOutModel)
@@ -29,5 +31,6 @@ async def get(user: users = Depends(get_current_user)):
 
 @router.put('/update', response_model=UserOutModel)
 async def put(new_data: UserUpdateModel, user: users = Depends(get_current_user)):
-    upd_user = await update_user(user, new_data)
-    return upd_user
+    if phone_is_valid(new_data.phone):
+        upd_user = await update_user(user, new_data)
+        return upd_user

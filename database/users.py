@@ -7,6 +7,7 @@ from database.db_config import engine
 from models.users import users
 from schemas.users import UserBaseModel
 from services.utils import hash_password
+from services.validators import password_is_valid, phone_is_valid
 
 
 async def create_user(user):
@@ -49,10 +50,15 @@ async def update_user(user, new_data):
     '''
     async with engine.connect() as conn:
         stmt = update(users).returning(users).where(users.c.email == user.email).values(name=new_data.name, phone=new_data.phone)
-        result = await conn.execute(stmt)
-        upd_user = result.fetchone()._mapping
-        await conn.commit()
-        return UserBaseModel(**upd_user)
+        try:
+            result = await conn.execute(stmt)
+            upd_user = result.fetchone()._mapping
+            await conn.commit()
+            return UserBaseModel(**upd_user)
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(status_code=422, detail=f'User already exists')
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Internal server error: {e}')
 
 
 async def delete_user(user):
