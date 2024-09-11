@@ -1,13 +1,11 @@
 import sqlalchemy
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 from sqlalchemy import select, insert, delete, update
-from sqlalchemy.orm import Session
 
 from database.db_config import engine
 from models.users import users
 from schemas.users import UserBaseModel
 from services.utils import hash_password
-from services.validators import password_is_valid, phone_is_valid
 
 
 async def create_user(user):
