@@ -1,6 +1,6 @@
-from _datetime import datetime, UTC
+from _datetime import datetime
 
-from sqlalchemy import MetaData, Table, Column, Integer, String, TIMESTAMP, ForeignKey
+from sqlalchemy import MetaData, Table, Column, Integer, String, TIMESTAMP, Boolean
 
 metadata = MetaData()
 
@@ -13,5 +13,6 @@ users = Table(
     Column('email', String, nullable=False, unique=True),
     Column('phone', String, nullable=False, unique=True),
     Column('password', String, nullable=False),
-    Column('registered_at', TIMESTAMP, default=datetime.utcnow)
+    Column('registered_at', TIMESTAMP, default=datetime.utcnow),
+    Column('is_admin', Boolean, default=False)
 )
