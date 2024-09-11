@@ -2,8 +2,9 @@ from fastapi import HTTPException
 from sqlalchemy import select, insert, update, delete
 
 from database.db_config import engine
-from models.store import items
-from schemas.store import ItemOutModel, ItemCreateUpdateModel, ItemCreateUpdateOutModel, ItemDeleteModel
+from models.store import items, cart
+from schemas.store import ItemOutModel, ItemCreateUpdateModel, ItemCreateUpdateOutModel, ItemDeleteModel, \
+    CartOutItemModel
 
 
 async def get_available_items() -> list[ItemOutModel]:
@@ -76,3 +77,25 @@ async def delete_item(item_id: int) -> ItemDeleteModel:
             return ItemDeleteModel(id=item_id, name=item_name)
         else:
             raise HTTPException(status_code=404, detail='Item not found')
+
+
+async def add_item_to_cart(item, user):
+    '''
+    Создает запись  в таблице корзины
+    '''
+    async with engine.connect() as conn:
+        stmt = insert(cart).values(item_id=item.item_id, user_id=user.id, qty=item.item_qty)
+        await conn.execute(stmt)
+        await conn.commit()
+
+
+async def select_from_cart(user) -> list[CartOutItemModel]:
+    '''
+    Получает список товаров в корзине
+    '''
+    async with engine.connect() as conn:
+        stmt = select(cart.c.id, cart.c.item_id, items.c.name, items.c.price, cart.c.qty).where(cart.c.user_id == user.id).join(items, items.c.id == cart.c.item_id)
+        result = await conn.execute(stmt)
+        data = result.fetchall()
+        item_list = [CartOutItemModel(id=d[0], item_id=d[1], item_name=d[2], item_price=d[3], item_qty=d[4]) for d in data]
+        return item_list

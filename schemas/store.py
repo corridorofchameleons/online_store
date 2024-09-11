@@ -39,3 +39,27 @@ class ItemDeleteModel(BaseModel):
     """
     id: int
     name: str
+
+
+class CartItemModel(BaseModel):
+    """
+    Валидатор объекта в корзине
+    """
+    item_id: int
+    item_qty: int | None = 1
+
+
+class CartOutItemModel(CartItemModel):
+    """
+    Валидатор публичного представления объекта в корзине
+    """
+    id: int
+    item_name: str
+    item_price: int
+
+
+class CartItemListModel(BaseModel):
+    """
+    Валидатор публичного представления списка объектов в корзине
+    """
+    items: list[CartOutItemModel]
