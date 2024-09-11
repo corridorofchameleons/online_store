@@ -43,7 +43,7 @@ async def get_current_user(request: Request):
     try:
         token = request.headers.get('Authorization').split()[1]
         found_user = decode_jwt_token(token)
-    except (jwt.exceptions.InvalidSignatureError, jwt.exceptions.DecodeError, IndexError):
+    except (jwt.exceptions.InvalidSignatureError, jwt.exceptions.DecodeError, IndexError, AttributeError):
         raise HTTPException(status_code=401, detail='Authentication failed')
 
     if not found_user:
@@ -58,3 +58,12 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=401, detail='Wrong token')
 
     return user
+
+
+async def user_is_admin(user_email):
+    """
+    Проверяет, является ли пользователь админом
+    """
+    user = await get_user_by_email(user_email)
+    if not user.is_admin:
+        raise HTTPException(status_code=401, detail='Unauthorized')
