@@ -4,19 +4,9 @@ from fastapi import HTTPException, APIRouter, status, Request
 from config.settings import SECRET_KEY, ALGORITHM
 from database.users import get_user_by_email
 from schemas.auth import AuthModel
-from services.utils import hash_password
+from services.utils import hash_password, create_jwt_token, decode_jwt_token
 
 router = APIRouter()
-
-
-def create_jwt_token(data: dict):
-    to_encode = data.copy()
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-def decode_jwt_token(token):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
 @router.post("/token")
@@ -50,7 +40,6 @@ async def get_current_user(request: Request):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     user = await get_user_by_email(found_user.get('email'))
 
@@ -60,10 +49,11 @@ async def get_current_user(request: Request):
     return user
 
 
-async def user_is_admin(user_email):
+async def user_is_admin(request: Request):
     """
     Проверяет, является ли пользователь админом
     """
-    user = await get_user_by_email(user_email)
+    user = await get_current_user(request)
     if not user.is_admin:
         raise HTTPException(status_code=401, detail='Unauthorized')
+    return user

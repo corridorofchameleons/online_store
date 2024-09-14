@@ -24,22 +24,19 @@ async def get_one(item_id: int, user: users = Depends(get_current_user)):
 
 
 @router.post('/items/create', response_model=ItemCreateUpdateOutModel)
-async def create(item: ItemCreateUpdateModel, user: users = Depends(get_current_user)):
-    await user_is_admin(user.email)
+async def create(item: ItemCreateUpdateModel, user: users = Depends(user_is_admin)):
     result = await create_item(item)
     return result
 
 
 @router.put('/items/update/{item_id}', response_model=ItemCreateUpdateOutModel)
-async def update(item_id: int, item: ItemCreateUpdateModel, user: users = Depends(get_current_user)):
-    await user_is_admin(user.email, )
+async def update(item_id: int, item: ItemCreateUpdateModel, user: users = Depends(user_is_admin)):
     result = await update_item(item_id, item)
     return result
 
 
 @router.delete('/items/delete/{item_id}', response_model=ItemDeleteModel)
-async def delete(item_id: int, user: users = Depends(get_current_user)):
-    await user_is_admin(user.email)
+async def delete(item_id: int, user: users = Depends(user_is_admin)):
     result = await delete_item(item_id)
     return result
 

@@ -38,7 +38,7 @@ class UserUpdateModel(BaseModel):
 
 class UserOutModel(BaseModel):
     """
-    Сериализатор модели ответа
+    Сериализатор ответа
     """
     name: str
     email: str
