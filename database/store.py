@@ -84,9 +84,12 @@ async def add_item_to_cart(item, user):
     Создает запись  в таблице корзины
     '''
     async with engine.connect() as conn:
-        stmt = insert(cart).values(item_id=item.item_id, user_id=user.id, qty=item.item_qty)
-        await conn.execute(stmt)
-        await conn.commit()
+        stmt = insert(cart).values(item_id=item.item_id, user_id=user.id, qty=item.qty)
+        try:
+            await conn.execute(stmt)
+            await conn.commit()
+        except:
+            raise HTTPException(status_code=422, detail='Товар уже добавлен')
 
 
 async def select_from_cart(user) -> list[CartOutItemModel]:
@@ -97,5 +100,35 @@ async def select_from_cart(user) -> list[CartOutItemModel]:
         stmt = select(cart.c.id, cart.c.item_id, items.c.name, items.c.price, cart.c.qty).where(cart.c.user_id == user.id).join(items, items.c.id == cart.c.item_id)
         result = await conn.execute(stmt)
         data = result.fetchall()
-        item_list = [CartOutItemModel(id=d[0], item_id=d[1], item_name=d[2], item_price=d[3], item_qty=d[4]) for d in data]
+        item_list = [CartOutItemModel(id=d[0], item_id=d[1], item_name=d[2], item_price=d[3], qty=d[4]) for d in data]
         return item_list
+
+
+async def update_qty(item, user):
+    '''
+    Обновляет количество товара в корзине
+    '''
+    async with engine.connect() as conn:
+        stmt = update(cart).where((cart.c.user_id == user.id) & (cart.c.item_id == item.item_id)).values(qty=item.qty)
+        await conn.execute(stmt)
+        await conn.commit()
+
+
+async def remove_from_cart(item, user):
+    '''
+    Удаляет товар из корзины
+    '''
+    async with engine.connect() as conn:
+        stmt = delete(cart).where((cart.c.user_id == user.id) & (cart.c.item_id == item.item_id))
+        await conn.execute(stmt)
+        await conn.commit()
+
+
+async def clear_everything(user):
+    '''
+    Очищает корзину по id юзера
+    '''
+    async with engine.connect() as conn:
+        stmt = delete(cart).where(cart.c.user_id == user.id)
+        await conn.execute(stmt)
+        await conn.commit()

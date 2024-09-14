@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class ItemOutModel(BaseModel):
     """
-    Валидатор ответа модели товара
+    Сериализатор ответа модели товара
     """
     id: int
     name: str
@@ -12,14 +12,14 @@ class ItemOutModel(BaseModel):
 
 class ItemListModel(BaseModel):
     """
-    Валидатор списка товаров
+    Сериализатор списка товаров
     """
     items: list[ItemOutModel]
 
 
 class ItemCreateUpdateModel(BaseModel):
     """
-    Валидатор создания товара
+    Сериализатор создания товара
     """
     name: str
     price: int
@@ -28,30 +28,36 @@ class ItemCreateUpdateModel(BaseModel):
 
 class ItemCreateUpdateOutModel(ItemCreateUpdateModel):
     """
-    Валидатор ответа после создания товара
+    Сериализатор ответа после создания товара
     """
     id: int
 
 
 class ItemDeleteModel(BaseModel):
     """
-    Валидатор ответа после удаления товара
+    Сериализатор ответа после удаления товара
     """
     id: int
     name: str
 
 
-class CartItemModel(BaseModel):
+class CartDeleteItem(BaseModel):
     """
-    Валидатор объекта в корзине
+    Сериализатор удаления товара из корзины
     """
     item_id: int
-    item_qty: int | None = 1
+
+
+class CartItemModel(CartDeleteItem):
+    """
+    Сериализатор объекта в корзине
+    """
+    qty: int | None = 1
 
 
 class CartOutItemModel(CartItemModel):
     """
-    Валидатор публичного представления объекта в корзине
+    Сериализатор публичного представления объекта в корзине
     """
     id: int
     item_name: str
@@ -60,6 +66,6 @@ class CartOutItemModel(CartItemModel):
 
 class CartItemListModel(BaseModel):
     """
-    Валидатор публичного представления списка объектов в корзине
+    Сериализатор публичного представления списка объектов в корзине
     """
     items: list[CartOutItemModel]

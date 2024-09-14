@@ -2,11 +2,11 @@ from fastapi import Depends
 from fastapi.routing import APIRouter
 
 from database.store import get_available_items, get_item, create_item, update_item, delete_item, add_item_to_cart, \
-    select_from_cart
+    select_from_cart, update_qty, remove_from_cart, clear_everything
 from models.users import users
 from routers.auth import get_current_user, user_is_admin
 from schemas.store import ItemListModel, ItemOutModel, ItemCreateUpdateModel, ItemCreateUpdateOutModel, ItemDeleteModel, \
-    CartItemModel, CartItemListModel
+    CartItemModel, CartItemListModel, CartDeleteItem
 
 router = APIRouter()
 
@@ -54,3 +54,21 @@ async def add_to_cart(item: CartItemModel, user: users = Depends(get_current_use
 async def view_cart(user: users = Depends(get_current_user)):
     items = await select_from_cart(user)
     return {"items": items}
+
+
+@router.put('/cart/update')
+async def update_item_qty(item: CartItemModel, user: users = Depends(get_current_user)):
+    await update_qty(item, user)
+    return {"status": "ok"}
+
+
+@router.delete('/cart/delete')
+async def delete_item(item: CartDeleteItem, user: users = Depends(get_current_user)):
+    await remove_from_cart(item, user)
+    return {"status": "ok"}
+
+
+@router.delete('/cart/clear')
+async def clear_cart(user: users = Depends(get_current_user)):
+    await clear_everything(user)
+    return {"status": "ok"}
