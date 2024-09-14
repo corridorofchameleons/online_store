@@ -3,8 +3,8 @@ from fastapi.routing import APIRouter
 
 from database.users import create_user, delete_user, get_user_by_email, update_user
 from models.users import users
-from routers.auth import get_current_user
 from schemas.users import UserCreateModel, UserOutModel, UserUpdateModel
+from services.services import get_current_user
 from services.validators import user_data_is_valid, phone_is_valid
 
 router = APIRouter()

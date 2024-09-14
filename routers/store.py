@@ -4,9 +4,9 @@ from fastapi.routing import APIRouter
 from database.store import get_available_items, get_item, create_item, update_item, delete_item, add_item_to_cart, \
     select_from_cart, update_qty, remove_from_cart, clear_everything
 from models.users import users
-from routers.auth import get_current_user, user_is_admin
 from schemas.store import ItemListModel, ItemOutModel, ItemCreateUpdateModel, ItemCreateUpdateOutModel, ItemDeleteModel, \
     CartItemModel, CartItemListModel, CartDeleteItem
+from services.services import get_current_user, user_is_admin
 
 router = APIRouter()
 
@@ -49,8 +49,8 @@ async def add_to_cart(item: CartItemModel, user: users = Depends(get_current_use
 
 @router.get('/cart', response_model=CartItemListModel)
 async def view_cart(user: users = Depends(get_current_user)):
-    items = await select_from_cart(user)
-    return {"items": items}
+    items, total = await select_from_cart(user)
+    return {"items": items, "total": total}
 
 
 @router.put('/cart/update')

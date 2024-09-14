@@ -69,3 +69,4 @@ class CartItemListModel(BaseModel):
     Сериализатор публичного представления списка объектов в корзине
     """
     items: list[CartOutItemModel]
+    total: int

@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.sql.functions import sum as sql_sum
 
 from database.db_config import engine
 from models.store import items, cart
@@ -92,7 +93,7 @@ async def add_item_to_cart(item, user):
             raise HTTPException(status_code=422, detail='Товар уже добавлен')
 
 
-async def select_from_cart(user) -> list[CartOutItemModel]:
+async def select_from_cart(user) -> tuple[list[CartOutItemModel], int]:
     '''
     Получает список товаров в корзине
     '''
@@ -101,7 +102,8 @@ async def select_from_cart(user) -> list[CartOutItemModel]:
         result = await conn.execute(stmt)
         data = result.fetchall()
         item_list = [CartOutItemModel(id=d[0], item_id=d[1], item_name=d[2], item_price=d[3], qty=d[4]) for d in data]
-        return item_list
+        total = await calculate_total(user)
+    return item_list, total
 
 
 async def update_qty(item, user):
@@ -132,3 +134,14 @@ async def clear_everything(user):
         stmt = delete(cart).where(cart.c.user_id == user.id)
         await conn.execute(stmt)
         await conn.commit()
+
+
+async def calculate_total(user):
+    '''
+    Считает стоимость всей корзины
+    '''
+    async with engine.connect() as conn:
+        stmt = select(sql_sum(cart.c.qty * items.c.price)).where(cart.c.user_id == user.id).join(items, items.c.id == cart.c.item_id)
+        result = await conn.execute(stmt)
+        total = result.fetchone()[0]
+    return total
