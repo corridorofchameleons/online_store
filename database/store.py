@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import select, insert, update, delete
 
-from database.db_config import engine, async_session_maker
+from database.db_config import async_session_maker
 from models.store import items, cart
 from schemas.store import ItemOutModel, ItemCreateUpdateModel, ItemCreateUpdateOutModel, ItemDeleteModel, \
     CartOutItemModel

@@ -4,7 +4,7 @@
 
 ### Стек
 
-FastAPI, SQL Alchemy, Docker, JWT, Async
+FastAPI, SQL Alchemy, Alembic, Docker, JWT, Async
 
 ### Запуск
 

@@ -2,7 +2,7 @@ import sqlalchemy
 from fastapi import HTTPException
 from sqlalchemy import select, insert, delete, update
 
-from database.db_config import engine, async_session_maker
+from database.db_config import async_session_maker
 from models.users import users
 from schemas.users import UserBaseModel
 from services.utils import hash_password

@@ -2,7 +2,6 @@ import jwt
 from fastapi import HTTPException, status, Request
 
 from database.users import get_user_by_email
-from schemas.store import CartItemListModel
 from services.utils import decode_jwt_token
 
 
