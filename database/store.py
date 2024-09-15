@@ -101,8 +101,14 @@ async def select_from_cart(user) -> tuple[list[CartOutItemModel], int]:
         stmt = select(cart.c.id, cart.c.item_id, items.c.name, items.c.price, cart.c.qty).where(cart.c.user_id == user.id).join(items, items.c.id == cart.c.item_id)
         result = await conn.execute(stmt)
         data = result.fetchall()
-        item_list = [CartOutItemModel(id=d[0], item_id=d[1], item_name=d[2], item_price=d[3], qty=d[4]) for d in data]
-        total = await calculate_total(user)
+
+        total = 0
+        item_list = []
+
+        for d in data:
+            item_list.append(CartOutItemModel(id=d[0], item_id=d[1], item_name=d[2], item_price=d[3], qty=d[4]))
+            total += d[3] * d[4]
+
     return item_list, total
 
 
@@ -134,14 +140,3 @@ async def clear_everything(user):
         stmt = delete(cart).where(cart.c.user_id == user.id)
         await conn.execute(stmt)
         await conn.commit()
-
-
-async def calculate_total(user):
-    '''
-    Считает стоимость всей корзины
-    '''
-    async with engine.connect() as conn:
-        stmt = select(sql_sum(cart.c.qty * items.c.price)).where(cart.c.user_id == user.id).join(items, items.c.id == cart.c.item_id)
-        result = await conn.execute(stmt)
-        total = result.fetchone()[0]
-    return total

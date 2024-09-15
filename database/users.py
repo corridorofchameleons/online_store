@@ -2,7 +2,7 @@ import sqlalchemy
 from fastapi import HTTPException
 from sqlalchemy import select, insert, delete, update
 
-from database.db_config import engine
+from database.db_config import engine, async_session_maker
 from models.users import users
 from schemas.users import UserBaseModel
 from services.utils import hash_password
@@ -15,15 +15,15 @@ async def create_user(user):
     hashed_password = hash_password(user.password)
 
     try:
-        async with engine.connect() as conn:
+        async with async_session_maker() as session:
             stmt = insert(users).values(
                 name=user.name,
                 email=user.email,
                 phone=user.phone,
                 password=hashed_password
             )
-            await conn.execute(stmt)
-            await conn.commit()
+            await session.execute(stmt)
+            await session.commit()
 
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(status_code=422, detail=f'User already exists')
@@ -35,9 +35,9 @@ async def get_user_by_email(email: str):
     '''
     Ищет пользователя по почте. Возвращает или пользователя, или None
     '''
-    async with engine.connect() as conn:
+    async with async_session_maker() as session:
         stmt = select(users).where(users.c.email == email)
-        user = await conn.execute(stmt)
+        user = await session.execute(stmt)
 
     return user.first()
 
@@ -46,12 +46,12 @@ async def update_user(user, new_data):
     '''
     Изменяет данные пользователя
     '''
-    async with engine.connect() as conn:
+    async with async_session_maker() as session:
         stmt = update(users).returning(users).where(users.c.email == user.email).values(name=new_data.name, phone=new_data.phone)
         try:
-            result = await conn.execute(stmt)
+            result = await session.execute(stmt)
             upd_user = result.fetchone()._mapping
-            await conn.commit()
+            await session.commit()
             return UserBaseModel(**upd_user)
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=422, detail=f'User already exists')
@@ -63,7 +63,7 @@ async def delete_user(user):
     '''
     Удаляет пользователя
     '''
-    async with engine.connect() as conn:
+    async with async_session_maker() as session:
         stmt = delete(users).where(users.c.id == user.id)
-        await conn.execute(stmt)
-        await conn.commit()
+        await session.execute(stmt)
+        await session.commit()
