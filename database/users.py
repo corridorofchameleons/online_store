@@ -20,7 +20,8 @@ async def create_user(user):
                 name=user.name,
                 email=user.email,
                 phone=user.phone,
-                password=hashed_password
+                password=hashed_password,
+                is_admin=user.is_admin
             )
             await session.execute(stmt)
             await session.commit()

@@ -24,6 +24,7 @@ class UserCreateModel(BaseModel):
     phone: str
     password: str
     password_2: str
+    is_admin: bool = False
 
 
 class UserUpdateModel(BaseModel):
